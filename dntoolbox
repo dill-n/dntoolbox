@@ -1,0 +1,446 @@
+--/////////// DN_TOOLBOX
+--/////////// A window full of useful modeling tools all in one location
+--/////////// By Dillon Hetrick
+
+--V_0.4
+
+try (closeRolloutFloater MainFloater) catch() --Closes exiting Window if one is open
+
+------------CalledMenu(s)
+
+--Property Windows
+Rollout CylinderProp "Cylinder Properties" width:180 height:64
+(
+	Spinner ssides "Cylinder Sides" type:#integer range:[3,100,1]
+
+	--Cylinder Spinner Scripts
+	on ssides changed val do
+	(
+		$.sides = $.sides = Val 
+	)
+
+)
+
+Rollout SphereProp "Sphere Properties" width:180 height:64
+(
+	Spinner ssegs "Sphere Segments" type:#integer range:[8,100,1]
+	
+		on ssegs changed val do
+	(
+		$.segs = $.segs = Val 
+	)
+
+)
+------------CalledMenu(s)
+
+rollout Menu01 "View"
+(
+	--View Buttons
+	button IsolateToggle "Isolate" pos:[1,1] width:80 height: 20
+	button ShadedMaps "Shaded Maps" pos:[87,1] width:80 height: 20
+	label tyep01 "Camera Position:" pos:[5,27]
+	button PerspCam "P" pos:[87,24] width:20 height: 20
+	button TopCam "T" pos:[107,24] width:20 height: 20
+	button FrontCam "F" pos:[127,24] width:20 height: 20
+	button LeftCam "L" pos:[147,24] width:20 height: 20
+	button configView "Configure Viewports" pos:[1,45] height:20
+	
+	--View Button Scripts
+	on IsolateToggle pressed do
+	(
+		actionMan.executeAction 0 "268" --Isolate Selected opjects toggle
+	)
+	
+	on ShadedMaps pressed do
+	(
+		actionMan.executeAction 0 "63545" --Shaded Materials With Maps
+	)
+	
+	on PerspCam pressed do
+	(
+		max vpt persp user
+		actionMan.executeAction 0 "63566" --Default Shading
+	)
+	
+	on TopCam pressed do
+	(
+		max vpt top
+	)
+	
+	on FrontCam pressed do
+	(
+		max vpt front
+	)	
+	
+	on LeftCam pressed do
+	(
+		max vpt left
+	)	
+	
+		on configView pressed do
+	(
+		max vptconfig
+	)
+	
+	
+)
+
+rollout Menu02 "Create"
+(
+	--Create Buttons
+	groupBox geoGrp "Geometry" pos:[1,1] width:166 height:40
+	button makebox "Box" pos:[2,16] width:30 height: 20
+	button makecylinder "Cylinder" pos:[32,16] width:48 height: 20 toolTip:"R Click for Propeties"
+	button makesphere "Sphere" pos:[80,16] width:45 height: 20 toolTip:"R Click for Propeties"
+	button makeplane "Plane" pos:[125,16] width:41 height: 20
+	groupBox shapeGrp "Shapes" pos:[1,43] width:166 height:42
+	button makepoint "Point Box" pos:[5,57] width:75 height: 20 toolTip:"R Click for Cross"
+	button makeline "Line" pos:[87,57] width:75 height: 20
+	
+	--Create Button Scripts
+	on makebox pressed do
+	(
+		default= layermanager.getlayer 0
+		default.current = true
+		Box length:30 width:30 height:30 isSelected:on
+		$.name = "Box_001"
+	)
+	
+	on makecylinder pressed do
+	(
+		default= layermanager.getlayer 0
+		default.current = true
+		Cylinder  radius:15 height:30 sides:16 isSelected:on
+		$.name = "Cylinder_001"
+	)
+	
+	on makecylinder rightclick do
+	(
+		default= layermanager.getlayer 0
+		default.current = true
+		CreateDialog CylinderProp
+		Cylinder  radius:15 height:30 sides:16 isSelected:on
+		$.name = "Cylinder_001"
+	)
+	
+	on makesphere pressed do -----SPHERE
+	(
+		default= layermanager.getlayer 0
+		default.current = true
+		Sphere  radius:15 segs:16 isSelected:on
+		$.name = "Sphere_001"
+	)
+	
+	on makesphere rightclick do -----SPHERE PROP
+	(
+		default= layermanager.getlayer 0
+		default.current = true
+		CreateDialog SphereProp
+		Sphere  radius:15 segs:16 isSelected:on
+		$.name = "Sphere_001"
+	)	
+	
+	on makeplane pressed do -----PLANE
+	(
+		default= layermanager.getlayer 0
+		default.current = true
+		Plane  length:30 width:30 lengthsegs:4 widthsegs:4 isSelected:on
+		$.name = "Plane_001"
+	)	
+	
+	on makepoint pressed do
+	(
+		default= layermanager.getlayer 0
+		default.current = true
+		Point  size:200 cross:off box:on isSelected:on
+		$.name = "Point_001"
+	)
+
+	on makepoint rightclick do
+	(
+		default= layermanager.getlayer 0
+		default.current = true
+		Point  size:200 cross:on box:off isSelected:on
+		$.name = "Point_001"
+	)	
+	on makeline pressed do
+	(
+		default= layermanager.getlayer 0
+		default.current = true
+		macros.run "Objects Shapes" "Lines"
+		line ()
+	)
+	
+)
+
+rollout Menu03 "Edit Poly"
+(
+	--Edit Poly Buttons
+	Group "Modifiers" 
+	(
+		button editPoly "Edit Poly" align:#left  width:70 height: 20
+		button blank "" align:#left offset:[0,-3] width:70 height: 20
+		button uvwMod "UVW" align:#right offset:[0,-47] width:70 height: 20
+		button uvwWin "UVWindow" align:#right offset:[0,-3] width:70 height: 20 toolTip: "WIP"
+	)
+	
+	--Pivots Group
+	Group "Pivots" 
+	(
+	-- 	groupBox pivotsGrp "Pivots" pos:[1,27] width:166 height:42
+		checkbutton affectPiv "Affect" checked:false align:#left width:47 height: 20
+		button centerPiv "Center" align:#center offset:[0,-25] width:47 height: 20
+		button originPiv "Origin" align:#right offset:[0,-25] width:47 height: 20
+	)
+	
+	--Constraints
+	radiobuttons consRad "Constraints:" columns:2 align:#left \
+		labels:#("None","Edge", "Face", "Normal")
+	
+	--Reference Coordinate System
+	dropdownlist coordSystem "Ref Coordinates System:" align:#left \
+		items:#("View","Local","Parent")
+	
+	on editPoly pressed do
+	(
+		modPanel.addModToSelection (Edit_Poly ()) ui:on
+	)
+
+	on uvwMod pressed do
+	(
+		modPanel.addModToSelection (Unwrap_UVW ()) ui:on
+	)
+
+	on uvwWin pressed do
+	(
+		messagebox "Coming Soon"
+	)
+	
+	
+	----------PIVOTS
+	on affectPiv changed state do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+			if state == on then
+			  maxops.pivotmode = #pivotonly
+			else
+			  maxops.pivotmode = #none
+		)
+		
+	)
+
+	on centerPiv pressed do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		macros.run "PolyTools" "CenterPivot"
+	)	
+
+	on originPiv pressed do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		macros.run "PolyTools" "PivotToOrigin"
+	)
+	
+	on smoothwin pressed do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an faces"
+		)
+		else
+		(
+		--macros.run "Ribbon - Modeling" "SmoothingGroupsDialog"
+			messagebox "Coming Soon"
+		)
+	)
+	
+	on clearSmooth pressed do
+	(
+		macros.run "Editable Polygon Object" "EPoly_ClearSmoothing"
+	)
+	
+
+	
+	--Constraints
+	on consRad changed state do
+	(
+		if selection.count == 1 then
+		(	
+			if consRad.state == 1 then
+			(
+				if(classof (modPanel.getCurrentObject()) == Editable_Poly) then
+					(
+						$.constrainType = 0
+					)
+				else
+				if(classof (modPanel.getCurrentObject()) == Edit_Poly) then
+					(
+						$.modifiers[#Edit_Poly].constrainType = 0
+					)
+				else	
+					(
+						messagebox "No Poly Modifer. Add Edit Poly."
+					)
+			)
+			if consRad.state == 2 then
+			(
+				if(classof (modPanel.getCurrentObject()) == Editable_Poly) then
+					(
+						$.constrainType = 1
+					)
+				else
+				if(classof (modPanel.getCurrentObject()) == Edit_Poly) then
+					(
+						$.modifiers[#Edit_Poly].constrainType = 1
+					)
+				else	
+					(
+						messagebox "No Poly Modifer. Add Edit Poly."
+					)
+			)
+			if consRad.state == 3 then
+			(
+				if(classof (modPanel.getCurrentObject()) == Editable_Poly) then
+					(
+						$.constrainType = 2
+					)
+				else
+				if(classof (modPanel.getCurrentObject()) == Edit_Poly) then
+					(
+						$.modifiers[#Edit_Poly].constrainType = 2
+					)
+				else	
+					(
+						messagebox "No Poly Modifer. Add Edit Poly."
+					)
+			)
+			if consRad.state == 4 then
+			(
+				if(classof (modPanel.getCurrentObject()) == Editable_Poly) then
+					(
+						$.constrainType = 3
+					)
+				else
+				if(classof (modPanel.getCurrentObject()) == Edit_Poly) then
+					(
+						$.modifiers[#Edit_Poly].constrainType = 3
+					)
+				else	
+					(
+						messagebox "No Poly Modifer. Add Edit Poly."
+					)
+			)			
+		)
+		
+		else
+		(
+			messagebox "Select Edit Poly Object"
+		)
+	)
+
+	
+	--Reference Coordinate System
+	
+	on coordSystem selected i do
+	(
+		if coordSystem.selection == 1 then
+		(
+			toolMode.coordsys #view
+		)
+		else
+		if coordSystem.selection == 2 then
+		(
+			toolMode.coordsys #local
+		)
+		else
+		if coordSystem.selection == 3 then
+		(
+			toolMode.coordsys #parent
+		)
+	)
+)
+
+rollout Menu04 "Reference Images"
+
+(
+	--Reference Image Options
+	Group "Image Plane Options" 
+	(
+		button refImage "Image Plane" align:#left  width:70 height: 20 tooltip:"Create Image Layer and Plane"
+		button imageMat "Img Material" align:#right offset:[0,-25] width:70 height: 20 tooltip:"WORK IN PROGRESS"
+	)	
+	
+	on refImage pressed do
+	(
+		--Creates Ref Layer if one doesnt exist and sets display to shaded
+		newlayer = LayerManager.newLayerFromName "ReferenceImage_Layer"
+		if newlayer != undefined do
+		(
+			newlayer.display = #shaded
+		)
+		
+		--Selects Ref Layer
+		selectlayer = LayerManager.getLayerFromName "ReferenceImage_Layer"
+		selectlayer.current = true
+		
+		--Creates Plane for image with display by layer on
+		imPlane=Plane  length:30 width:30 lengthsegs:1 widthsegs:1 isSelected:on
+		imPlane.displayByLayer = true
+		--$.name = "ImagePlane_001"
+	)
+	
+	on imageMat pressed do
+	(
+		messagebox "Coming Soon"
+	)
+)
+
+MainFloater = newRolloutFloater "DN" 180 600
+addRollout Menu01 MainFloater
+addRollout Menu02 MainFloater
+addRollout Menu03 MainFloater
+addRollout Menu04 MainFloater --rolledUp:true 
+
+
+
+
+
+
+
+
+--------------Notes
+
+--Create
+-----SPhere Plane and Cyl Prop
+
+-- Uv mod/ open uv windows
+
+--Pivots--- Multi Select
+
+-- Smooth Groups 
+--	20,45,60,80,Clearall 
+
+--Mirror Object Props
+-- Deselect subobj 
+-- Attach selected 
+-- ProBoolean
+
+--Ribbon tools?
+--	Cut, Swift loop, bridge, chamfer, collapse, connect, weld, repeat last
+
+--Reference image 
+-- 	Creates new layer adds new plane to it 
+--	Select an image to assign to the plane
