@@ -1,49 +1,60 @@
---/////////// DN_TOOLBOX
---/////////// A window full of useful modeling tools all in one location
---/////////// By Dillon Hetrick
 
---V_0.4
 
-try (closeRolloutFloater MainFloater) catch() --Closes exiting Window if one is open
+------------Closes Window if one is open
+try(cui.UnRegisterDialogBar Toolbox)catch()
+try(destroyDialog Toolbox)catch()
 
-------------CalledMenu(s)
+------------CalledMenu(s) for Create Propert windows
 
 --Property Windows
-Rollout CylinderProp "Cylinder Properties" width:180 height:64
+Rollout CylinderProp "Cylinder Properties" width:200 height:70
 (
-	Spinner ssides "Cylinder Sides" type:#integer range:[3,100,1]
+	Spinner ssides "Cylinder Sides:" type:#integer range:[3,100,1] 
+	Spinner capSegs "Cap Segments:" type:#integer range:[1,100,1] 
+	Spinner hiSegs "Height Segments:" type:#integer range:[1,100,1] 
 
 	--Cylinder Spinner Scripts
 	on ssides changed val do
 	(
 		$.sides = $.sides = Val 
 	)
+	
+	on capSegs changed val do
+	(
+		$.capsegs = $.capsegs = Val 
+	)
+	
+	on hiSegs changed val do
+	(
+		$.heightsegs = $.heightsegs = Val 
+	)
 
 )
 
 Rollout SphereProp "Sphere Properties" width:180 height:64
 (
-	Spinner ssegs "Sphere Segments" type:#integer range:[8,100,1]
+	Spinner ssegs "Sphere Segments" type:#integer range:[4,100,1]
 	
-		on ssegs changed val do
+	on ssegs changed val do
 	(
 		$.segs = $.segs = Val 
 	)
 
 )
-------------CalledMenu(s)
 
-rollout Menu01 "View"
+
+rollout menu01 "View"
 (
 	--View Buttons
-	button IsolateToggle "Isolate" pos:[1,1] width:80 height: 20
-	button ShadedMaps "Shaded Maps" pos:[87,1] width:80 height: 20
+	button IsolateToggle "Isolate" pos:[1,1] width:80 height: 20 tooltip:"Isolate Selection Toggle"
+	button wireFrame "Wireframe" pos:[87,1] width:80 height: 20 tooltip:"Toggle Wire Frame Views, Rclick for shaded"
 	label tyep01 "Camera Position:" pos:[5,27]
-	button PerspCam "P" pos:[87,24] width:20 height: 20
-	button TopCam "T" pos:[107,24] width:20 height: 20
-	button FrontCam "F" pos:[127,24] width:20 height: 20
-	button LeftCam "L" pos:[147,24] width:20 height: 20
-	button configView "Configure Viewports" pos:[1,45] height:20
+	button PerspCam "P" pos:[87,24] width:20 height: 20 tooltip:"Perspective"
+	button TopCam "T" pos:[107,24] width:20 height: 20 tooltip:"Top"
+	button FrontCam "F" pos:[127,24] width:20 height: 20 tooltip:"Front"
+	button LeftCam "L" pos:[147,24] width:20 height: 20 tooltip:"Left"
+	button stats "Stats Toggle" pos:[1,47] width:80 height:20 tooltip:"Statistics Toggle"
+	button configView "Config View" pos:[87,47] width:80 height:20 tooltip:"Configure Viewports Options Window"
 	
 	--View Button Scripts
 	on IsolateToggle pressed do
@@ -51,9 +62,14 @@ rollout Menu01 "View"
 		actionMan.executeAction 0 "268" --Isolate Selected opjects toggle
 	)
 	
-	on ShadedMaps pressed do
+	on wireFrame pressed do
 	(
-		actionMan.executeAction 0 "63545" --Shaded Materials With Maps
+		actionMan.executeAction 0 "369"
+	)
+	
+	on wireFrame rightclick do
+	(
+		actionMan.executeAction 0 "272"
 	)
 	
 	on PerspCam pressed do
@@ -77,22 +93,25 @@ rollout Menu01 "View"
 		max vpt left
 	)	
 	
-		on configView pressed do
+	on configView pressed do
 	(
 		max vptconfig
 	)
 	
-	
+	on stats pressed do
+	(
+		max show statistics toggle
+	)
 )
 
 rollout Menu02 "Create"
 (
 	--Create Buttons
 	groupBox geoGrp "Geometry" pos:[1,1] width:166 height:40
-	button makebox "Box" pos:[2,16] width:30 height: 20
-	button makecylinder "Cylinder" pos:[32,16] width:48 height: 20 toolTip:"R Click for Propeties"
-	button makesphere "Sphere" pos:[80,16] width:45 height: 20 toolTip:"R Click for Propeties"
-	button makeplane "Plane" pos:[125,16] width:41 height: 20
+	button makebox "Box" pos:[4,16] width:30 height: 20
+	button makecylinder "Cylinder" pos:[35,16] width:47 height: 20 toolTip:"R Click for Propeties"
+	button makesphere "Sphere" pos:[83,16] width:45 height: 20 toolTip:"R Click for Propeties"
+	button makeplane "Plane" pos:[129,16] width:35 height: 20
 	groupBox shapeGrp "Shapes" pos:[1,43] width:166 height:42
 	button makepoint "Point Box" pos:[5,57] width:75 height: 20 toolTip:"R Click for Cross"
 	button makeline "Line" pos:[87,57] width:75 height: 20
@@ -108,18 +127,18 @@ rollout Menu02 "Create"
 	
 	on makecylinder pressed do
 	(
-		default= layermanager.getlayer 0
+		default= layermanager.getlayer 0 -----CYL
 		default.current = true
-		Cylinder  radius:15 height:30 sides:16 isSelected:on
+		Cylinder  radius:15 height:30 sides:16 capsegs:1 isSelected:on
 		$.name = "Cylinder_001"
 	)
 	
-	on makecylinder rightclick do
+	on makecylinder rightclick do -----CYL PROP
 	(
 		default= layermanager.getlayer 0
 		default.current = true
 		CreateDialog CylinderProp
-		Cylinder  radius:15 height:30 sides:16 isSelected:on
+		Cylinder  radius:15 height:30 sides:16 capsegs:2 heightsegs:2 isSelected:on
 		$.name = "Cylinder_001"
 	)
 	
@@ -136,7 +155,7 @@ rollout Menu02 "Create"
 		default= layermanager.getlayer 0
 		default.current = true
 		CreateDialog SphereProp
-		Sphere  radius:15 segs:16 isSelected:on
+		Sphere  radius:15 segs:16 hemisphere:0 isSelected:on
 		$.name = "Sphere_001"
 	)	
 	
@@ -167,27 +186,26 @@ rollout Menu02 "Create"
 	(
 		default= layermanager.getlayer 0
 		default.current = true
-		macros.run "Objects Shapes" "Lines"
-		line ()
+		--macros.run "Objects Shapes" "Lines"
+		StartObjectCreation Line--------------------------------Would like to switch to modify panel after 
 	)
 	
 )
 
-rollout Menu03 "Edit Poly"
+rollout Menu03 "Modify"
 (
 	--Edit Poly Buttons
 	Group "Modifiers" 
 	(
 		button editPoly "Edit Poly" align:#left  width:70 height: 20
-		button blank "" align:#left offset:[0,-3] width:70 height: 20
-		button uvwMod "UVW" align:#right offset:[0,-47] width:70 height: 20
-		button uvwWin "UVWindow" align:#right offset:[0,-3] width:70 height: 20 toolTip: "WIP"
+		button morphTime "Morpher" align:#left offset:[0,-3] width:70 height: 20
+		button uvwMod "UVW" align:#right offset:[0,-47] width:70 height: 20 tooltip:"R Click for UV Window"
+		button proBool "Proboolean" align:#right offset:[0,-3] width:70 height: 20 toolTip: "WIP"
 	)
 	
 	--Pivots Group
 	Group "Pivots" 
 	(
-	-- 	groupBox pivotsGrp "Pivots" pos:[1,27] width:166 height:42
 		checkbutton affectPiv "Affect" checked:false align:#left width:47 height: 20
 		button centerPiv "Center" align:#center offset:[0,-25] width:47 height: 20
 		button originPiv "Origin" align:#right offset:[0,-25] width:47 height: 20
@@ -201,19 +219,40 @@ rollout Menu03 "Edit Poly"
 	dropdownlist coordSystem "Ref Coordinates System:" align:#left \
 		items:#("View","Local","Parent")
 	
+	button ClearSubobj "Clear Subobj" align:#left offset:[0,0] width:70 height: 20 toolTip: "Clears Subobject Selection"
+	
+	--Modify Scripts
 	on editPoly pressed do
 	(
 		modPanel.addModToSelection (Edit_Poly ()) ui:on
 	)
 
+	on morphTime pressed do
+	(
+		modPanel.addModToSelection (Morpher ()) ui:on
+	)
+	
 	on uvwMod pressed do
 	(
 		modPanel.addModToSelection (Unwrap_UVW ()) ui:on
 	)
-
-	on uvwWin pressed do
+	
+	on uvwMod rightclick do
 	(
-		messagebox "Coming Soon"
+		messagebox "Open UV Window"
+	)
+
+	on proBool pressed do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+			macros.run "Objects Compounds" "ProBoolean"
+			max modify mode
+		)
 	)
 	
 	
@@ -371,16 +410,113 @@ rollout Menu03 "Edit Poly"
 			toolMode.coordsys #parent
 		)
 	)
+	
+	--Clear Subobject SelectByChannel
+	on clearSubObj pressed do
+	(
+		subobjectLevel = 0
+	)
 )
 
-rollout Menu04 "Reference Images"
+rollout Menu04 "Mirror"
+(
+	group "Right Click for No Clone"
+	(
+		button xMirror "X" align:#left width:45 height:20 tooltip:"R Click No Clone."
+		button yMirror "Y" align:#center offset:[0,-25]width:45 height:20 tooltip:"R Click No Clone."
+		button zMirror "Z" align:#right offset:[0,-25] width:45 height:20 tooltip:"R Click No Clone."
+	)
+	
+	On xMirror pressed do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+		maxOps.cloneNodes $ cloneType:#copy newNodes:&nnl
+		$.transform  = prescale $.transform [-1,1,1]
+		)
+	)
+	
+	On xMirror rightclick do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+		$.transform  = prescale $.transform [-1,1,1]
+		)
+	)
+	
+	On yMirror pressed do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+		maxOps.cloneNodes $ cloneType:#copy newNodes:&nnl
+		$.transform  = prescale $.transform [1,-1,1]
+		)
+	)
+	
+	On yMirror rightclick do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+		$.transform  = prescale $.transform [1,-1,1]
+		)
+	)
+	
+	On zMirror pressed do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+		maxOps.cloneNodes $ cloneType:#copy newNodes:&nnl
+		$.transform  = prescale $.transform [1,1,-1]
+		)
+	)
+	
+	On zMirror rightclick do
+	(
+		
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+		$.transform  = prescale $.transform [1,1,-1]
+		)
+	)
 
+)
+
+rollout Menu05 "Smoothing Groups"
+(
+	
+)
+
+rollout Menu07 "Reference Images"
 (
 	--Reference Image Options
 	Group "Image Plane Options" 
 	(
-		button refImage "Image Plane" align:#left  width:70 height: 20 tooltip:"Create Image Layer and Plane"
-		button imageMat "Img Material" align:#right offset:[0,-25] width:70 height: 20 tooltip:"WORK IN PROGRESS"
+		button refImage "Image Plane" align:#left  width:70 height: 20 tooltip:"Create Reference Image Layer and Plane"
+		button ShadedMaps "Mats W Maps" align:#right offset:[0,-25] width:70 height: 20 tooltip:"Shaded Materials With Maps"
 	)	
 	
 	on refImage pressed do
@@ -397,50 +533,58 @@ rollout Menu04 "Reference Images"
 		selectlayer.current = true
 		
 		--Creates Plane for image with display by layer on
-		imPlane=Plane  length:30 width:30 lengthsegs:1 widthsegs:1 isSelected:on
+		imPlane=Plane  length:100 width:100 lengthsegs:1 widthsegs:1 isSelected:on
 		imPlane.displayByLayer = true
 		--$.name = "ImagePlane_001"
+		
+		
+		newMaterial = standardMaterial name:"Reference Plane Material"
+		--assign the new material to the plane
+		imPlane.material = newMaterial
 	)
 	
-	on imageMat pressed do
+	on ShadedMaps pressed do
 	(
-		messagebox "Coming Soon"
+		actionMan.executeAction 0 "63545" --Shaded Materials With Maps
 	)
+	
+
 )
 
-MainFloater = newRolloutFloater "DN" 180 600
-addRollout Menu01 MainFloater
-addRollout Menu02 MainFloater
-addRollout Menu03 MainFloater
-addRollout Menu04 MainFloater --rolledUp:true 
+
+rollout Toolbox "Toolbox"
+(
+	SubRollout theSubrollout "View" align:#center height:690 width:180
+)
 
 
 
+createdialog Toolbox 180 690
+AddSubRollout Toolbox.theSubrollout menu01
+AddSubRollout Toolbox.theSubrollout menu02
+AddSubRollout Toolbox.theSubrollout menu03
+AddSubRollout Toolbox.theSubrollout menu04
+AddSubRollout Toolbox.theSubrollout menu05
+
+AddSubRollout Toolbox.theSubrollout menu07  rolledUp:true 
+	
+cui.RegisterDialogBar Toolbox
+cui.dockDialogBar Toolbox #cui_dock_right
 
 
-
-
-
---------------Notes
-
---Create
------SPhere Plane and Cyl Prop
+--------------WIP ITEMS
 
 -- Uv mod/ open uv windows
-
---Pivots--- Multi Select
 
 -- Smooth Groups 
 --	20,45,60,80,Clearall 
 
---Mirror Object Props
--- Deselect subobj 
 -- Attach selected 
--- ProBoolean
 
---Ribbon tools?
---	Cut, Swift loop, bridge, chamfer, collapse, connect, weld, repeat last
+-- Add Ribbon tools?
+-------	Cut, Swift loop, bridge, chamfer, collapse, connect, weld, repeat last
 
 --Reference image 
 -- 	Creates new layer adds new plane to it 
 --	Select an image to assign to the plane
+
