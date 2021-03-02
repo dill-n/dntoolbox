@@ -1,4 +1,5 @@
-
+--////////// VERSION DN_toolbox_1_7
+--////////// Max Modeling tools gui and macro tools
 
 ------------Closes Window if one is open
 try(cui.UnRegisterDialogBar Toolbox)catch()
@@ -43,17 +44,17 @@ Rollout SphereProp "Sphere Properties" width:180 height:64
 )
 
 
-rollout menu01 "View"
+rollout Menu01 "View"
 (
 	--View Buttons
 	button IsolateToggle "Isolate" pos:[1,1] width:80 height: 20 tooltip:"Isolate Selection Toggle"
-	button wireFrame "Wireframe" pos:[87,1] width:80 height: 20 tooltip:"Toggle Wire Frame Views, Rclick for shaded"
+	button unitSetup "Unit Setup" pos:[87,1] width:80 height: 20 tooltip:"Opens Unit Setup window"
 	label tyep01 "Camera Position:" pos:[5,27]
 	button PerspCam "P" pos:[87,24] width:20 height: 20 tooltip:"Perspective"
-	button TopCam "T" pos:[107,24] width:20 height: 20 tooltip:"Top"
-	button FrontCam "F" pos:[127,24] width:20 height: 20 tooltip:"Front"
-	button LeftCam "L" pos:[147,24] width:20 height: 20 tooltip:"Left"
-	button stats "Stats Toggle" pos:[1,47] width:80 height:20 tooltip:"Statistics Toggle"
+	button TopCam "T" pos:[107,24] width:20 height: 20 tooltip:"Top, R click 4 Bottom"
+	button FrontCam "F" pos:[127,24] width:20 height: 20 tooltip:"Front, R Click 4 Back"
+	button LeftCam "L" pos:[147,24] width:20 height: 20 tooltip:"Left, R Click 4 Right"
+	button stats "Stats/Clipping" pos:[1,47] width:80 height:20 tooltip:"Statistics Toggle, R Click for Clipping"
 	button configView "Config View" pos:[87,47] width:80 height:20 tooltip:"Configure Viewports Options Window"
 	
 	--View Button Scripts
@@ -62,15 +63,11 @@ rollout menu01 "View"
 		actionMan.executeAction 0 "268" --Isolate Selected opjects toggle
 	)
 	
-	on wireFrame pressed do
+	on unitSetup pressed do
 	(
-		actionMan.executeAction 0 "369"
+		max unitsetup
 	)
 	
-	on wireFrame rightclick do
-	(
-		actionMan.executeAction 0 "272"
-	)
 	
 	on PerspCam pressed do
 	(
@@ -82,16 +79,28 @@ rollout menu01 "View"
 	(
 		max vpt top
 	)
+	on TopCam rightclick do
+	(
+		max vpt bottom
+	)
 	
 	on FrontCam pressed do
 	(
 		max vpt front
 	)	
+	on FrontCam rightclick do
+	(
+		max vpt back
+	)
 	
 	on LeftCam pressed do
 	(
 		max vpt left
 	)	
+	on LeftCam rightclick do
+	(
+		max vpt right
+	)
 	
 	on configView pressed do
 	(
@@ -102,19 +111,32 @@ rollout menu01 "View"
 	(
 		max show statistics toggle
 	)
+	
+	on stats rightclick do
+	(
+	actionMan.executeAction 0 "374"
+	)
 )
 
 rollout Menu02 "Create"
 (
 	--Create Buttons
-	groupBox geoGrp "Geometry" pos:[1,1] width:166 height:40
-	button makebox "Box" pos:[4,16] width:30 height: 20
-	button makecylinder "Cylinder" pos:[35,16] width:47 height: 20 toolTip:"R Click for Propeties"
-	button makesphere "Sphere" pos:[83,16] width:45 height: 20 toolTip:"R Click for Propeties"
-	button makeplane "Plane" pos:[129,16] width:35 height: 20
-	groupBox shapeGrp "Shapes" pos:[1,43] width:166 height:42
-	button makepoint "Point Box" pos:[5,57] width:75 height: 20 toolTip:"R Click for Cross"
-	button makeline "Line" pos:[87,57] width:75 height: 20
+-- 	groupBox geoGrp "Geometry" pos:[1,1] width:166 height:40
+	Group "Geometry"
+	(
+	button makebox "Box" align:#left  width:70 height: 20 
+	button makecylinder "Cylinder" align:#left offset:[0,-3] width:70 height: 20 
+	button autoBox "Auto Box" align:#right offset:[0,-47] width:70 height: 20 
+	button autoCyl "Auto Cyl" align:#right offset:[0,-3] width:70 height: 20 
+	button makesphere "Sphere" align:#left  offset:[0,-3] width:70 height: 20 
+	button makeplane "Plane" align:#right offset:[0,-25] width:70 height: 20 
+	)
+	
+	Group "Shapes"
+	(
+	button makepoint "Point Box" align:#left width:70 height: 20  toolTip:"R Click for Cross"
+	button makeline "Line" align:#right offset:[0,-25] width:70 height: 20 
+	)
 	
 	--Create Button Scripts
 	on makebox pressed do
@@ -131,6 +153,18 @@ rollout Menu02 "Create"
 		default.current = true
 		Cylinder  radius:15 height:30 sides:16 capsegs:1 isSelected:on
 		$.name = "Cylinder_001"
+	)
+	
+	on autoBox pressed do
+	(
+	maxOps.autogrid 
+	startObjectCreation box
+	)
+	
+	on autoCyl pressed do
+	(
+	maxOps.autogrid
+	startObjectCreation cylinder
 	)
 	
 	on makecylinder rightclick do -----CYL PROP
@@ -192,23 +226,238 @@ rollout Menu02 "Create"
 	
 )
 
-rollout Menu03 "Modify"
+rollout Menu03 "Modifiers"
 (
 	--Edit Poly Buttons
 	Group "Modifiers" 
 	(
-		button editPoly "Edit Poly" align:#left  width:70 height: 20
-		button morphTime "Morpher" align:#left offset:[0,-3] width:70 height: 20
+		button editPoly "Edit Poly" align:#left  width:70 height: 20 tooltip:"Adds edit poly Modifier"
+		button morphTime "Morpher" align:#left offset:[0,-3] width:70 height: 20 tooltip:"Adds Morph Modifier"
 		button uvwMod "UVW" align:#right offset:[0,-47] width:70 height: 20 tooltip:"R Click for UV Window"
-		button proBool "Proboolean" align:#right offset:[0,-3] width:70 height: 20 toolTip: "WIP"
+		button proBool "Proboolean" align:#right offset:[0,-3] width:70 height: 20 toolTip: "Creates Proboolean"
+		button collapseMod "Collapse All" align:#left  offset:[0,-3] width:70 height: 20 toolTip: "Collapse Stack"
+		button skinMod "Skin" align:#right offset:[0,-25] width:70 height: 20 toolTip: "Adds Skin Modifier"
+		
 	)
+	
+		--Modify Scripts
+	on editPoly pressed do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+		modPanel.addModToSelection (Edit_Poly ()) ui:on
+		)
+	)
+
+	on morphTime pressed do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+		modPanel.addModToSelection (Morpher ()) ui:on
+		)
+	)
+	
+	on uvwMod pressed do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+		modPanel.addModToSelection (Unwrap_UVW ()) ui:on
+		)
+	)
+	
+-- 	on uvwMod rightclick do
+-- 	(
+-- 		messagebox "Open UV Window"
+-- 	)
+
+	on proBool pressed do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+			macros.run "Objects Compounds" "ProBoolean"		
+			max modify mode
+		)
+	)
+	
+	on collapseMod pressed do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+			maxOps.CollapseNode $ off
+			max modify mode
+		)
+	)
+	
+	on skinMod pressed do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+			modPanel.addModToSelection (Skin ()) ui:on
+		)
+	)
+
+	
+)
+
+rollout Menu04 "Ribbon Tools"
+(
+	--Edit Poly Buttons
+	Group "Modeling" 
+	(
+		button bridge "Bridge" align:#left  width:70 height: 20 tooltip:"R CLick for Bridge Options"
+		button cut "Cut" align:#left offset:[0,-3] width:70 height: 20 
+		button connectEp "Connect" align:#right offset:[0,-47] width:70 height: 20 tooltip: "Only for edges atm :("
+		button chamferEp "Chamfer" align:#right offset:[0,-3] width:70 height: 20 tooltip:"R CLick for Chamfer Options"
+		button capHole "Cap" align:#left  offset:[0,-3] width:70 height: 20 
+		button weld "Weld" align:#right offset:[0,-25] width:70 height: 20 
+		
+	)
+
+	on bridge pressed do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+		modPanel.addModToSelection (Edit_Poly ()) ui:on
+		subobjectLevel = 2
+		macros.run "Ribbon - Modeling" "EdgeBridge"
+		)
+	)
+	
+	on bridge rightclick do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+		modPanel.addModToSelection (Edit_Poly ()) ui:on
+		subobjectLevel = 2
+		macros.run "Ribbon - Modeling" "EdgeBridgeOptions"
+		)
+	)
+
+	on cut pressed do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+		modPanel.addModToSelection (Edit_Poly ()) ui:on
+		macros.run "Ribbon - Modeling" "CutsCut"
+		)
+	)
+	
+	on capHole pressed do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an border edges"
+		)
+		else
+		(
+		macros.run "Ribbon - Modeling" "Cap"
+		)
+	)
+
+	on connectEp pressed do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select Edges or Verts"
+		)
+		else
+		(
+		--modPanel.addModToSelection (Edit_Poly ()) ui:on
+		macros.run "Ribbon - Modeling" "ConnectEdges"
+		)
+	)
+	
+	on chamferEp pressed do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+		modPanel.addModToSelection (Edit_Poly ()) ui:on
+		macros.run "Ribbon - Modeling" "EPoly_Chamfer"
+		)
+	)
+
+	on chamferEp rightclick do
+	(
+		if selection.count == 0 then
+		(
+			messagebox "Select an object"
+		)
+		else
+		(
+		modPanel.addModToSelection (Edit_Poly ()) ui:on
+		macros.run "Ribbon - Modeling" "EPoly_ChamferOptions"
+		)
+	)
+
+
+	
+	on weld pressed do
+	(
+		if selection.count == 0 then
+		(
+		messagebox "Select border edges"
+		)
+		else
+		(
+		macros.run "Ribbon - Modeling" "EPoly_Weld"
+		)
+	)
+
+
+	
+)
+
+rollout Menu05 "Edit"
+(
+
 	
 	--Pivots Group
 	Group "Pivots" 
 	(
-		checkbutton affectPiv "Affect" checked:false align:#left width:47 height: 20
-		button centerPiv "Center" align:#center offset:[0,-25] width:47 height: 20
-		button originPiv "Origin" align:#right offset:[0,-25] width:47 height: 20
+		checkbutton affectPiv "Affect" checked:false align:#left width:70 height: 20
+		button centerPiv "Center" align:#right offset:[0,-25] width:70 height: 20
+		checkbutton aligntPiv "Align Select" checked:false align:#left width:70 height: 20
+		button originPiv "Origin" align:#right offset:[0,-25] width:70 height: 20
 	)
 	
 	--Constraints
@@ -220,40 +469,6 @@ rollout Menu03 "Modify"
 		items:#("View","Local","Parent")
 	
 	button ClearSubobj "Clear Subobj" align:#left offset:[0,0] width:70 height: 20 toolTip: "Clears Subobject Selection"
-	
-	--Modify Scripts
-	on editPoly pressed do
-	(
-		modPanel.addModToSelection (Edit_Poly ()) ui:on
-	)
-
-	on morphTime pressed do
-	(
-		modPanel.addModToSelection (Morpher ()) ui:on
-	)
-	
-	on uvwMod pressed do
-	(
-		modPanel.addModToSelection (Unwrap_UVW ()) ui:on
-	)
-	
-	on uvwMod rightclick do
-	(
-		messagebox "Open UV Window"
-	)
-
-	on proBool pressed do
-	(
-		if selection.count == 0 then
-		(
-			messagebox "Select an object"
-		)
-		else
-		(
-			macros.run "Objects Compounds" "ProBoolean"
-			max modify mode
-		)
-	)
 	
 	
 	----------PIVOTS
@@ -293,22 +508,24 @@ rollout Menu03 "Modify"
 		macros.run "PolyTools" "PivotToOrigin"
 	)
 	
-	on smoothwin pressed do
+	on aligntPiv changed state do
 	(
 		if selection.count == 0 then
 		(
-			messagebox "Select an faces"
+			messagebox "Select an object"
 		)
 		else
 		(
-		--macros.run "Ribbon - Modeling" "SmoothingGroupsDialog"
-			messagebox "Coming Soon"
+			if state == on then
+			(
+			  max place
+				toolMode.coordsys #local
+				maxops.pivotmode = #pivotonly
+			)
+			else
+			  maxops.pivotmode = #none
 		)
-	)
-	
-	on clearSmooth pressed do
-	(
-		macros.run "Editable Polygon Object" "EPoly_ClearSmoothing"
+		
 	)
 	
 
@@ -418,7 +635,7 @@ rollout Menu03 "Modify"
 	)
 )
 
-rollout Menu04 "Mirror"
+rollout Menu06 "Mirror"
 (
 	group "Right Click for No Clone"
 	(
@@ -505,12 +722,12 @@ rollout Menu04 "Mirror"
 
 )
 
-rollout Menu05 "Smoothing Groups"
+rollout Menu07 "Smoothing Groups"
 (
 	
 )
 
-rollout Menu07 "Reference Images"
+rollout Menu08 "Reference Images"
 (
 	--Reference Image Options
 	Group "Image Plane Options" 
@@ -552,21 +769,20 @@ rollout Menu07 "Reference Images"
 )
 
 
-rollout Toolbox "Toolbox"
-(
-	SubRollout theSubrollout "View" align:#center height:690 width:180
-)
 
 
 
-createdialog Toolbox 180 690
-AddSubRollout Toolbox.theSubrollout menu01
-AddSubRollout Toolbox.theSubrollout menu02
-AddSubRollout Toolbox.theSubrollout menu03
-AddSubRollout Toolbox.theSubrollout menu04
-AddSubRollout Toolbox.theSubrollout menu05
 
-AddSubRollout Toolbox.theSubrollout menu07  rolledUp:true 
+createdialog Toolbox 180 700
+AddSubRollout Toolbox.theSubrollout menu01 rolledUp:false	----View
+AddSubRollout Toolbox.theSubrollout menu02 rolledUp:false	----Create
+AddSubRollout Toolbox.theSubrollout menu03 rolledUp:true 	----Modifiers
+AddSubRollout Toolbox.theSubrollout menu04 rolledUp:true 	----Ribbon Tools
+AddSubRollout Toolbox.theSubrollout menu05 rolledUp:false	----Edit
+AddSubRollout Toolbox.theSubrollout menu06 rolledUp:true 	----Mirror
+AddSubRollout Toolbox.theSubrollout menu08  rolledUp:true ---- Reference Image
+
+--AddSubRollout Toolbox.theSubrollout menu07		----SmoothGroups Menu For the future...?
 	
 cui.RegisterDialogBar Toolbox
 cui.dockDialogBar Toolbox #cui_dock_right
@@ -574,15 +790,14 @@ cui.dockDialogBar Toolbox #cui_dock_right
 
 --------------WIP ITEMS
 
--- Uv mod/ open uv windows
+-- Uv mod open uv windows
 
 -- Smooth Groups 
 --	20,45,60,80,Clearall 
 
 -- Attach selected 
 
--- Add Ribbon tools?
--------	Cut, Swift loop, bridge, chamfer, collapse, connect, weld, repeat last
+-- Proboolean SetPlanarEdgeRemoval 2
 
 --Reference image 
 -- 	Creates new layer adds new plane to it 
